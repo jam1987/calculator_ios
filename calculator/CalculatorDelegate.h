@@ -1,5 +1,5 @@
 //
-//  MySecondAppViewController.h
+//  CalculatorDelegate.h
 //  calculator
 //
 //  Created by Julio De Abreu on 20/06/12.
@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
-@interface MySecondAppViewController : UIViewController
+@interface CalculatorDelegate : UIResponder <UIApplicationDelegate>
+
+@property (strong, nonatomic) UIWindow *window;
 
 @end

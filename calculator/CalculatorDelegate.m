@@ -1,14 +1,14 @@
 //
-//  MySecondAppAppDelegate.m
+//  CalculatorDelegate.m
 //  calculator
 //
 //  Created by Julio De Abreu on 20/06/12.
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "MySecondAppAppDelegate.h"
+#import "CalculatorDelegate.h"
 
-@implementation MySecondAppAppDelegate
+@implementation CalculatorDelegate
 
 @synthesize window = _window;
 
