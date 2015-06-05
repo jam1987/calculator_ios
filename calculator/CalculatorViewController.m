@@ -14,9 +14,13 @@
 // Esta propiedad es usada para saber si el usuario ha dejado de
 // introducir numeros.
 @property (nonatomic) BOOL  userIsToTheMiddleOfTyppingNumber; 
-
+@property (nonatomic) BOOL  userIsToTheMiddelOfTyppingVariable;
 // Esta propiedad es para tener acceso a los metodos del brain (Modelo).
 @property (nonatomic,strong) CalculatorBrain *brain;
+@property (nonatomic,strong) NSString *group; 
+@property (nonatomic,strong) NSMutableDictionary *testVariableValues;
+@property (nonatomic,strong) NSMutableSet *variablesUsedInProgram;
+
 
 @end
 
@@ -27,9 +31,16 @@
 // Esta propiedad representa el display que se encuentra en la parte superior, el
 // cual lleva el historial de todas las operaciones.
 @synthesize history_display = _history_display;
+@synthesize variable_display = _variable_display;
 @synthesize userIsToTheMiddleOfTyppingNumber = _userIsToTheMiddleOfTyppingNumber;
+@synthesize userIsToTheMiddelOfTyppingVariable = _userIsToTheMiddelOfTyppingVariable;
 @synthesize brain = _brain;
+@synthesize testVariableValues = _testVariableValues;
+@synthesize variablesUsedInProgram = _variablesUsedInProgram;
+@synthesize group = _group;
 
+
+int number = 0;
 
 /* Nombre del metodo: brain
  * Parametros de entrada: Ninguno
@@ -43,6 +54,29 @@
         _brain = [[CalculatorBrain  alloc ] init];
     }
     return _brain;
+};
+
+
+-(NSMutableSet*)variablesUsedInProgram {
+    if (!_variablesUsedInProgram) {
+        _variablesUsedInProgram = [[NSMutableSet alloc] init];
+    }
+    return _variablesUsedInProgram;
+}
+
+
+-(NSMutableDictionary*)testVariableValues {
+    if (!_testVariableValues) {
+        _testVariableValues =[[NSMutableDictionary alloc] init];
+    }
+    return _testVariableValues;
+}
+
+-(NSString*) group {
+    if (!_group) {
+        _group = [[NSString alloc] init];
+    }
+    return _group;
 }
 
 /* Nombre del metodo: digitPressed
@@ -129,44 +163,117 @@
     [self.brain pushOperand:[self.display.text doubleValue]];
     // Esto es para formar el historial de operaciones que se muestra en la parte superior 
     // de la calculadora.
-    if ([[self.history_display.text substringToIndex:1] doubleValue]==0) {
-        self.history_display.text = @"";
+    if ([self.history_display.text isEqualToString:@"0"]) {
+        NSRange range = [self.history_display.text rangeOfString:@"0"];
+        self.history_display.text = [self.history_display.text stringByReplacingCharactersInRange:range withString:@""];
     }
-    
-    self.history_display.text = [self.history_display.text stringByAppendingString:self.display.text];
-    self.history_display.text = [self.history_display.text stringByAppendingString:@" "];
+    if (number==0) {
+         
+        self.history_display.text = [self.history_display.text stringByAppendingString:self.display.text];
+        self.history_display.text = [self.history_display.text stringByAppendingString:@" "];
+            self.userIsToTheMiddleOfTyppingNumber = NO;
+        number++;
+    } else {
+       
+        NSString *aux= self.display.text;
+        aux = [aux stringByAppendingString:@" "];
+        aux = [aux stringByAppendingString:@","];
+        aux = [aux stringByAppendingString:@" "];
+        aux = [aux stringByAppendingString:self.history_display.text];
+        self.history_display.text = aux;
         self.userIsToTheMiddleOfTyppingNumber = NO;
+        number++;
+
+    }
 }
 
-/* Nombre del Metodo: ad_sub_pressed
- * Parametros de Entrada: sender de tipo id.
- * Tipo que devuelve: IBAction
- * Descripcion del Metodo: Este metodo detecta si el boton
- * "-/+" fue presionado, y en caso positivo, se chequea alguno
- * de los dos siguientes casos: 1) Si se ha presionado un numero
- * se le cambia el signo. 2) Si no se ha presionado un numero,
- * se toma el ultimo operando que entro en la pila y se le aplica
- * como un operador unario.
- */
-- (IBAction)ad_sub_pressed:(id)sender {
-    if (self.userIsToTheMiddleOfTyppingNumber) {
-        double number = [self.display.text doubleValue];
-        number = number * (-1);
-        NSString *res = [NSString stringWithFormat:@"%g",number];
-        self.display.text = res;
-    } else {
-        double resultado = [self.brain performOperation:[sender currentTitle]];
-        NSString *res = [NSString stringWithFormat:@"%g",resultado];
-        self.display.text = res;
-        self.history_display.text = [self.history_display.text stringByAppendingString:[sender currentTitle]];
-        self.history_display.text = [self.history_display.text stringByAppendingString:@" "];
-        self.history_display.text = [self.history_display.text stringByAppendingString:@"="];
-        self.history_display.text = [self.history_display.text stringByAppendingString:res];
-        self.history_display.text = [self.history_display.text stringByAppendingString:@" "];
-        self.display.text = res;
 
+
+- (IBAction)testPressed:(id)sender {
+    int k=1;
+   
+    if ([[sender currentTitle] isEqualToString:@"Test 1"]) {
+        NSArray *keys = [self.testVariableValues allKeys];
+        [self.testVariableValues removeAllObjects];
+        for (NSString *key in keys) {
+            [self.testVariableValues setObject:[NSString stringWithFormat:@"%d",k] forKey:key];
+            k++;
+        }
+        
+    } else if ([[sender currentTitle] isEqualToString:@"Test 2"]) {
+        k=-1;
+        NSArray *keys = [self.testVariableValues allKeys];
+        [self.testVariableValues removeAllObjects];
+        for (NSString *key in keys) {
+            [self.testVariableValues setObject:[NSString stringWithFormat:@"%d",k] forKey:key];
+            k--;
+        }
+        
+    } else if ([[sender currentTitle] isEqualToString:@"Test 3"]) {
+        NSArray *keys = [self.testVariableValues allKeys];
+        [self.testVariableValues removeAllObjects];
+        for (NSString *key in keys) {
+            [self.testVariableValues setObject:@"0" forKey:key];
+        }
         
     }
+    
+    self.variable_display.text = @"";
+    
+    for (id key in self.testVariableValues) {
+        
+        self.variable_display.text = [[[[self.variable_display.text stringByAppendingString:[NSString stringWithFormat:key]] stringByAppendingString:@" = "] stringByAppendingString:[self.testVariableValues objectForKey:key]] stringByAppendingString:@"  "];
+    }
+    self.userIsToTheMiddelOfTyppingVariable=NO;
+}
+
+- (IBAction)variablePressed:(UIButton*)sender {
+    NSString *var = [sender currentTitle];
+    if (![self.variablesUsedInProgram containsObject:var]) {
+        [self.variablesUsedInProgram addObject:var];
+        
+        [self.brain pushVariable:var];
+        
+
+        [self.testVariableValues setObject:[NSString stringWithFormat:@"%g",0] forKey:var];   
+        /* Se detecta si el usuario no ha dejado de presionar digitos
+         */
+        if (self.userIsToTheMiddelOfTyppingVariable) {
+            self.variable_display.text = [self.variable_display.text stringByAppendingString:@"  "];
+            self.variable_display.text = [[[self.variable_display.text stringByAppendingString:[sender currentTitle]] stringByAppendingString:@" = "] stringByAppendingString:[NSString stringWithFormat:@"%g",0]];
+            
+            self.history_display.text = [self.history_display.text stringByAppendingString:[sender currentTitle]];
+            self.history_display.text = [self.history_display.text stringByAppendingString:@" "];
+
+            
+        } else {
+    
+            self.variable_display.text = [[[sender currentTitle] stringByAppendingString:@" = "] stringByAppendingString:@"0"];     
+            NSString *aux= [sender currentTitle];
+            aux = [aux stringByAppendingString:@" "];
+            aux = [aux stringByAppendingString:@","];
+            aux = [aux stringByAppendingString:@" "];
+            aux = [aux stringByAppendingString:self.history_display.text];
+            self.history_display.text = aux;
+
+            self.userIsToTheMiddelOfTyppingVariable = YES;
+        }
+        double resultado = [self.brain performOperation:[sender currentTitle] usingVariablesValues:self.testVariableValues];
+        if (resultado==INFINITY || isnan(resultado)) {
+            self.display.text = @"Math Error!";
+        } else {
+            
+            // Se guarda tanto el resultado como la operacion dentro del historial de operaciones
+            // que se muestra en la parte superior de la calculadora.
+            NSString *result = [NSString stringWithFormat:@"%g",resultado];
+            self.history_display.text = [self.history_display.text stringByAppendingString:[sender currentTitle]];
+            self.history_display.text = [self.brain printOperation:[sender currentTitle]];
+            
+            self.display.text = result;
+        }
+
+    }
+
 }
 
 /* Nombre del Metodo: operationPressed
@@ -180,7 +287,7 @@
     // antes de presionar el boton del operador.
     if (self.userIsToTheMiddleOfTyppingNumber) [self enterPressed];
     // Aqui se obtiene el resultado
-    double resultado = [self.brain performOperation:[sender currentTitle]];
+    double resultado = [self.brain performOperation:[sender currentTitle] usingVariablesValues:self.testVariableValues];
     // Esto es para detectar la division por cero.
     
     if (resultado==INFINITY || isnan(resultado)) {
@@ -191,10 +298,8 @@
         // que se muestra en la parte superior de la calculadora.
         NSString *result = [NSString stringWithFormat:@"%g",resultado];
         self.history_display.text = [self.history_display.text stringByAppendingString:[sender currentTitle]];
-        self.history_display.text = [self.history_display.text stringByAppendingString:@" "];
-        self.history_display.text = [self.history_display.text stringByAppendingString:@"="];
-        self.history_display.text = [self.history_display.text stringByAppendingString:result];
-        self.history_display.text = [self.history_display.text stringByAppendingString:@" "];
+        self.history_display.text = [self.brain printOperation:[sender currentTitle]];
+
         self.display.text = result;
     }
     
@@ -214,8 +319,17 @@
     self.display.text = cero;
     // Se borra el historial de operaciones.
     self.history_display.text = cero;
+    self.variable_display.text = @"";
+    [self.testVariableValues removeAllObjects];
+    [self.variablesUsedInProgram removeAllObjects];
     self.userIsToTheMiddleOfTyppingNumber = NO;
+    number = 0;
+    
 }
 
 
+- (void)viewDidUnload {
+    [self setVariable_display:nil];
+    [super viewDidUnload];
+}
 @end
